@@ -27,9 +27,10 @@ from kics_getKSqVector import getKSqVector
 
 def kICSSubNoise(r_k,ksq_min,ksq_max):
     # get k-squared values between [ksq_min,ksq_max] for averaging
-    (_,_,noise_inds) = getKSqVector(r_k, ('kSqMin', ksq_min, 'kSqMax', ksq_max), True)
+    noise_inds = getKSqVector(r_k, ('kSqMin', ksq_min, 'kSqMax', ksq_max), True)
     r_k_0 = r_k[:,:,0]
     
     # subtract averaged noise value estimate from autocorrelation at tau=0
     r_k_0_sub = r_k[:,:,0] - np.mean(r_k_0[noise_inds])
+    
     return r_k_0_sub
