@@ -29,7 +29,7 @@ use_time_win = 1
 time_win = 200
 
 # logical for including windowing in fit model
-win_fit = 0
+win_fit = 1
 
 # tau range to fit
 tauVector = np.arange(10)
@@ -50,9 +50,9 @@ n_fits = 5
 # lower/upper bounds on fit parameters, [D,rho_on,K,p_D]
 # lb = np.spacing(1)*np.ones((1,4))
 # ub = [np.inf, 1, np.inf, 1]
-bounds = [(np.spacing(1),1000), # np.inf
+bounds = [(np.spacing(1),np.inf), # np.inf
           (np.spacing(1),1),
-          (np.spacing(1),1000), # np.inf
+          (np.spacing(1),np.inf), # np.inf
           (np.spacing(1),1),
           ]
 
@@ -85,8 +85,8 @@ nPtsFitPlot = int(1e3)
 
 for i in range(np.size(roi,0)):
     # roi image series
-    J_roi = np.copy(J[roi[i, 1]:roi[i, 1]+roi[0, 3]-1,
-                    roi[i, 0]:roi[i, 0]+roi[i, 2]-1, :])
+    J_roi = np.copy(J[roi[i, 1]:roi[i, 1]+roi[0, 3]+1,
+                    roi[i, 0]:roi[i, 0]+roi[i, 2]+1, :])
 
     # compute kICS autocorr
     # tic
@@ -101,8 +101,9 @@ for i in range(np.size(roi,0)):
     
     r_k_0_sub = kICSSubNoise(np.copy(r_k), ksq_min_noise, ksq_max_noise)
     
+    # Circular Averaging
     r_k_0_circ,_ = circular(np.copy(r_k_0_sub[:,:]))
-    r_k_circ,_ = circular(np.copy(r_k))
+    r_k_circ,_ = circular(r_k)
     # get and cut |k|^2 vector
     kSqVector, kSqInd = getKSqVector(J_roi)
     kSqVectorSubset, kSqSubsetInd = getKSqVector(
@@ -125,6 +126,7 @@ for i in range(np.size(roi,0)):
     # fit function for entire autocorrelation
     if win_fit:
         k_p = np.spacing(1)
+        k_p = 200
         err = lambda params: kICSSlideWinFit(params,kSqVectorSubset,tauVector,k_p,(T,time_win+1,'err',r_k_norm,'symvars',np.array([''])))
         fit_fun = lambda params, ksq, tau: kICSSlideWinFit(params,ksq,tau,k_p,(T,time_win+1,'symvars',np.array([''])))
     else:
@@ -184,10 +186,11 @@ for i in range(np.size(roi,0)):
                 +'_'+str(roi[i,1]+roi[i,3]-1)
                 )
     
-    d = {'r_k_norm': r_k_norm, 'kSqMin': kSqMin, 'kSqMax': kSqMax,
-         'opt_params': opt_params, 'win_fit': win_fit, 'time_win': time_win,
-         'tauVector': tauVector, 'err_min': err_min}
+    print("Optimal parameter are: " + str(opt_params))
+    # d = {'r_k_norm': r_k_norm, 'kSqMin': kSqMin, 'kSqMax': kSqMax,
+    #      'opt_params': opt_params, 'win_fit': win_fit, 'time_win': time_win,
+    #      'tauVector': tauVector, 'err_min': err_min}
 
-    with open(filename, 'wb') as f:
-        pickle.dump(d, f)
+    # with open(filename, 'wb') as f:
+    #     pickle.dump(d, f)
 

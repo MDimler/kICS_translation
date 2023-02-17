@@ -20,7 +20,8 @@ def timeIntkICSFit(params,kSq,tauVector,varargin):
             pass
 
     s = {'diffusion':params[0],'r':params[1],'K':params[2],'frac':params[3]}
-    tauGrid, kSqGrid = np.meshgrid(tauVector+1,kSq+1)
+    tauGrid, kSqGrid = np.meshgrid(tauVector+1,kSq)
+    #print(np.shape(tauVector), np.shape(kSq), np.shape(tauGrid), np.shape(kSqGrid), tauGrid[-1,-1], kSqGrid[-1,-1])
     tauGrid = tauGrid.astype(np.float64)
     kSqGrid = kSqGrid.astype(np.float64)
     # fit function computation
@@ -31,11 +32,6 @@ def timeIntkICSFit(params,kSq,tauVector,varargin):
     # normalized correlation function
 
     F = (s['frac']*diff_term+(1-s['frac'])*static_term)/F_norm
-    
-    if errBool: # test
-        if np.isnan(F[1,1]):
-            print(static_term, s['r'], F_norm[1,1], s['frac'], "Ronald", diff_term)
-        #print(np.shape(F), F[1,1])
     
     # the best measure for the error, so far, seems to be to calculate the LS
     # of each curve in tau individually, and then sum it. This is instead of
@@ -50,9 +46,9 @@ def timeIntkICSFit(params,kSq,tauVector,varargin):
             print(f"1Function is undefined for params: {params}.")
     else:
         out = np.double(err)
-        # if np.isnan(out):
-        #     print(f"2Function is undefined for params: {params}.")
-        #     print(F[1,1],ydata[1,1])
+        if np.isnan(out):
+            print(f"2Function is undefined for params: {params}.")
+
     
     return out
 
