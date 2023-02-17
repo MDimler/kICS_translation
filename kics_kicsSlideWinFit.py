@@ -32,16 +32,18 @@ def kICSSlideWinFit(params, kSq, tauVector, T_s, varargin):
         #         print(f"Unknown option for {varargin[i]}, using default options.")
     #s = setSymVars(all_vars, all_vals, sym_vars)
     
-    tauGrid, kSqGrid = np.meshgrid(tauVector,kSq)
+    tauGrid, kSqGrid = np.meshgrid(tauVector+1,kSq)
     tauGrid = tauGrid.astype(np.float64)
+    kSqGrid = kSqGrid.astype(np.float64)
     # fit function computation
     static_term, diff_term, static_term_norm, diff_term_norm = kICSSlideWinFn(s,kSqGrid,tauGrid)
     # PSF in k-space
     # Ik = exp(-s.w0^2.*kSqGrid/8);
     # Ik0 = exp(-s.w0^2.*kSq(1)/8);
     
-
+    
     # normalized correltaion function
+    
     F = ((s['frac']*diff_term+(1-s['frac'])*static_term)
         /(s['frac']*diff_term_norm+(1-s['frac'])*static_term_norm))
     # the best measure for the error, so far, seems to be to calculate the LS
@@ -49,10 +51,11 @@ def kICSSlideWinFit(params, kSq, tauVector, T_s, varargin):
     # calculating the norm point-by-point.
     if errBool:
         err = np.sqrt(np.sum((F-ydata)**2))
+
     
     if not errBool:
         out = F
-        if np.isnan(out.any()):
+        if np.isnan(out.all()):
             print(f"1Function is undefined for params: {params}.")
     else:
         out = np.double(err) # evtl Falsch double(err)???

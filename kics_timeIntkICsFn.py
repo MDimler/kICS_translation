@@ -24,6 +24,6 @@ def timeIntkICsFn(s,tauGrid,kSqGrid):
     # static autocorrelation term (norm)
     static_term_norm = (2*np.exp(-s['K'])*(1-np.exp(s['K'])*(1-s['K']))
                         *(1-s['r'])/(s['K'])**2)
-    print(np.shape(diff_term_norm), np.shape(s['diffusion']), np.shape(kSqGrid))
+    # print(np.shape(diff_term_norm), np.shape(kSqGrid))
     return (diff_term,static_term,diff_term_norm,static_term_norm)
 

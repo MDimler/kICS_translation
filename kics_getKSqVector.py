@@ -42,14 +42,14 @@ def getKSqVector(r_k, varargin="", nargout = False):
     # get 1-d vector of corresponding lattice points
     # treat even & odd cases separately
     if size_x%2 == 0:
-        xgv = np.arange(-size_x/2, size_x/2-1)
+        xgv = np.arange(-size_x/2, size_x/2)
     else:
-        xgv = np.arange(-(size_x-1)/2, (size_x-1)/2)
+        xgv = np.arange(-(size_x-1)/2, (size_x-1)/2+1)
 
     if size_y%2 == 0:
-        ygv = np.arange(-size_y/2, size_y/2-1)
+        ygv = np.arange(-size_y/2, size_y/2)
     else:
-        ygv = np.arange(-(size_y-1)/2, (size_y-1)/2)
+        ygv = np.arange(-(size_y-1)/2, (size_y-1)/2+1)
     # create xy-lattices
     xm, ym = np.meshgrid(xgv,ygv)
     # equivalent integer lattice to k-squared lattice

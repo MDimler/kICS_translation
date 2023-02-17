@@ -63,12 +63,13 @@ def kICS(J, varargin):
         else:
             print(f"Unknown varagin input {varargin[ii]}")
     
+
     J = np.double(J)
     
-    size_y = np.size(J,1)
-    size_x = np.size(J,0)
+    size_y = np.size(J,0)
+    size_x = np.size(J,1)
     T = np.size(J,2)
-    
+
     if use_time_fluct and not time_win:
         # subtract by temporal mean
         J_mean = np.tile(np.mean(J, 2),(np.size(J,2),1,1))
@@ -79,8 +80,8 @@ def kICS(J, varargin):
         N = win_k-1
         #J_fluct = J-scipy.signal.lfilter(np.ones(N)/N, [1], J, 2)
         # J_fluct = J-scipy.signal.lfilter(np.ones(N)/N, [1], J, 2)
-        J_fluct = J-scipy.ndimage.uniform_filter1d(J,size=N,axis=2,mode='nearest')
-
+        #J_fluct = J-scipy.ndimage.uniform_filter1d(J,size=N,axis=2,mode='nearest')
+        J_fluct = J-scipy.ndimage.uniform_filter1d(J,size=N,axis=2,mode='nearest', origin=(-win_k+2)//2)
     else:
         # no fluctuations
         J_fluct = J
@@ -92,15 +93,17 @@ def kICS(J, varargin):
     else:
         J_k = np.fft.fft2(J_fluct,axes=(0,1))
 
+
     if use_WKT:
         if math.floor(math.log2(T)) == math.log2(T):
             T_pad = 2*T
         else:
-            T_pad = 2**(math.ceil(math.log(T, 2)))
+            T_pad = 2**(math.ceil(math.log2(T)))
         
         F_J_k = np.fft.fft(J_k, T_pad, 2)
-        r_k = np.fft.ifft((F_J_k)*np.conjugate(F_J_k),axis=2) #Nochmal überprüfen
+        r_k = np.fft.ifft((F_J_k)*np.conjugate(F_J_k),axis=2)
         r_k = r_k[:,:,:T]
+        
     else:
         r_k = np.zeros((size_x, size_y, T))
         for tau in range(T):
@@ -113,5 +116,4 @@ def kICS(J, varargin):
         phi_k = r_k/r_k[:,:,norm_lag]
     else:
         phi_k = r_k
-    
     return phi_k
