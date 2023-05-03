@@ -81,7 +81,8 @@ def kICS(J, varargin):
         #J_fluct = J-scipy.signal.lfilter(np.ones(N)/N, [1], J, 2)
         # J_fluct = J-scipy.signal.lfilter(np.ones(N)/N, [1], J, 2)
         #J_fluct = J-scipy.ndimage.uniform_filter1d(J,size=N,axis=2,mode='nearest')
-        J_fluct = J-scipy.ndimage.uniform_filter1d(J,size=N,axis=2,mode='nearest', origin=(-win_k+2)//2)
+        J_fluct = J-scipy.ndimage.uniform_filter1d(J,size=N,axis=2,
+                                                   mode='nearest', origin=(-win_k+2)//2)
     else:
         # no fluctuations
         J_fluct = J
@@ -103,12 +104,11 @@ def kICS(J, varargin):
         F_J_k = np.fft.fft(J_k, T_pad, 2)
         r_k = np.fft.ifft((F_J_k)*np.conjugate(F_J_k),axis=2)
         r_k = r_k[:,:,:T]
-        
     else:
         r_k = np.zeros((size_x, size_y, T))
         for tau in range(T):
             r_k[:,:,tau] = np.dot(J_k[:,:,0:T-tau],J_k[:,:,tau:T], axis = 2)
-    #print(np.where(np.fft.ifft((F_J_k)*np.conjugate(F_J_k),axis=2)<0))
+
     for tau in range(T):
         r_k[:,:,tau] = 1/(T-tau)*np.fft.fftshift(r_k[:,:,tau])
 

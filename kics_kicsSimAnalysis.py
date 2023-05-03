@@ -13,7 +13,7 @@ from scipy import optimize
 import matplotlib.pyplot as plt
 import pickle # speichern der Variablen
 import cv2
-import sys
+import time
 
 from kics_kics import kICS
 from kics_kicsSubNoise import kICSSubNoise
@@ -25,11 +25,11 @@ from kics_timeIntkICsFit import timeIntkICSFit
 # input variables
 
 # time window
-use_time_win = 1
-time_win = 200
+use_time_win = 0
+time_win = 100 #200
 
 # logical for including windowing in fit model
-win_fit = 1
+win_fit = 0
 
 # tau range to fit
 tauVector = np.arange(10)
@@ -38,11 +38,11 @@ plotTauLags = np.arange(5)
 
 # min/max bounds on |k|^2
 kSqMin = np.spacing(1)
-kSqMax = 1.8
+kSqMax = 2 #1.8
 
 # min/max bounds on |k|^2
 ksq_min_noise = 10
-ksq_max_noise = 15
+ksq_max_noise = 15 # 15
 
 # number of fits to compare
 n_fits = 5
@@ -56,29 +56,46 @@ bounds = [(np.spacing(1),np.inf), # np.inf
           (np.spacing(1),1),
           ]
 
-
-#  rois to consider (one per row; form [x0,y0,width,height])
-
-roi = np.array([[0,0,63,63],
-        [64,64,63,63],
-        [0,64,63,63],
-        [64,0,63,63]
-        ])
-
 # import of images
-test1 = False
+test1 = True
 if test1:
     filename = 'D_5_kon_0.1_koff_0.9_frac_diff_0.7_kp_0.0001.tif'
 else:
     filename = 'D_0.01_kon_1_koff_0.7_frac_diff_0.65_kp_0.0001.tif.tif'
 
+# filename = './Data_Giovanni/POPC1Chol1/2_50mW_4ms.tif'
+# filename = './Data_Giovanni/POPC2Chol1/4ms_40mW_1.tif'
+# filename ='difftestseries.tif'
+# filename = 'frac_diff_0_9_2.tif'
+# filename = 'frac_diff_1_2_1part.tif'
+# filename = './SimulationParticles/frac_diff_1_2_1part.tif'
+filename = './SimulationBleach/frac_diff_1_2_0000001bleach.tif'
+
 im = cv2.imreadmulti(filename,[],cv2.IMREAD_UNCHANGED)
 J = np.asarray(im[1],dtype = np.float64)
 J = np.moveaxis(J,0,-1)
-
+print(np.shape(J))
 T = np.size(J,2)
 nPtsFitPlot = int(1e3)
 
+
+
+#  rois to consider (one per row; form [x0,y0,width,height])
+if np.size(J,1) >= 128 and np.size(J,0) >= 128:
+    roi = np.array([[0,0,63,63],
+            [64,64,63,63],
+            [0,64,63,63],
+            [64,0,63,63]
+            ])
+else:
+    roi = np.array([[0,0,31,31],
+            [32,32,31,31],
+            [0,32,31,31],
+            [32,0,31,31]
+            ])
+
+# roi = np.array([[0,0,63,63]])
+# roi = np.array([[0,0,127,127]])
 # main code
 
 # Ordner???
@@ -99,19 +116,18 @@ for i in range(np.size(roi,0)):
     
     r_k = kICS(J_roi, ('normByLag', 'none', *time_win_varargin))
     
-    r_k_0_sub = kICSSubNoise(np.copy(r_k), ksq_min_noise, ksq_max_noise)
+    r_k_0_sub = kICSSubNoise(r_k, ksq_min_noise, ksq_max_noise)
     
     # Circular Averaging
-    r_k_0_circ,_ = circular(np.copy(r_k_0_sub[:,:]))
+    r_k_0_circ,_ = circular(r_k_0_sub[:,:])
     r_k_circ,_ = circular(r_k)
     # get and cut |k|^2 vector
-    kSqVector, kSqInd = getKSqVector(J_roi)
+    # kSqVector, kSqInd = getKSqVector(J_roi) # Needed to plot kICS autocorrelation at tau=0
     kSqVectorSubset, kSqSubsetInd = getKSqVector(
         J_roi, ('kSqMin', kSqMin, 'kSqMax', kSqMax))
 
     # cut autocorrelation
-    
-    r_k_circ_cut = np.array([r_k_circ[i][tauVector+1] for i in kSqSubsetInd])
+    r_k_circ_cut = np.array([r_k_circ[j][tauVector+1] for j in kSqSubsetInd])
     # cut normalization
     r_k_0_circ_cut = r_k_0_circ[kSqSubsetInd,0]
     
@@ -163,7 +179,7 @@ for i in range(np.size(roi,0)):
     h_sim_data = np.zeros((1,len(plotTauLags)))
     
     for tauInd in range(len(plotTauLags)):
-        ax.scatter(kSqVectorSubset,r_k_norm[:,plot_idx[tauInd]], label=r'$\tau = \ %d $' %(plotTauLags[tauInd]), s=10)
+        ax.scatter(kSqVectorSubset,r_k_norm[:,plot_idx[tauInd]], label=r'$\tau = \ %d $' %((plotTauLags[tauInd]+1)), s=10)
 
     ax.set_xlabel(r'$|k|^2$ (pixels$^{-2}$)')
     ax.set_ylabel(r'$\tilde{\Phi}(|$k$|^2,\tau)$')
@@ -186,7 +202,9 @@ for i in range(np.size(roi,0)):
                 +'_'+str(roi[i,1]+roi[i,3]-1)
                 )
     
-    print("Optimal parameter are: " + str(opt_params))
+    print("Optimal parameter are: ")
+    for parm in opt_params:
+        print(parm)
     # d = {'r_k_norm': r_k_norm, 'kSqMin': kSqMin, 'kSqMax': kSqMax,
     #      'opt_params': opt_params, 'win_fit': win_fit, 'time_win': time_win,
     #      'tauVector': tauVector, 'err_min': err_min}

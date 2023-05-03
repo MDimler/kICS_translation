@@ -77,6 +77,7 @@ def getKSqVector(r_k, varargin="", nargout = False):
             if ksq[j] <= ksq_max:
                 iksq_max = j
                 break
+
     ksq_sub = ksq[iksq_min:iksq_max]
     iksq_sub = np.arange(iksq_min, iksq_max)
     if nargout:
