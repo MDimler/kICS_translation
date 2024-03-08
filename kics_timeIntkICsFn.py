@@ -1,13 +1,21 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jan 23 17:12:49 2023
+"""This module contains the function timeIntkICsFn.
 
+Created on Mon Jan 23 17:12:49 2023
 @author: Martin
 """
+
 import numpy as np
 
 def timeIntkICsFn(s,tauGrid,kSqGrid):
-    
+    """This function does some parts of the calculation of the normalised correlation function.
+
+    Inputs:
+    s:            Dictionary containing parameters needed for fitting. I.e. diffusion coefficient parameter, etc.
+    kSqGrid, tauGrid: Complex numpy arrays corresponding to the |k|^2-vector and the time lags.
+    Outputs:
+    tupel         Tupel corresponding to different parts of the normalised correlation function.
+    """
     A = s['diffusion'] * kSqGrid
     # diffusing autocorrelation factor
     diff_term = (np.exp(-(s['K']+A)*(1+tauGrid))*(np.exp(s['K']*(1+tauGrid))
