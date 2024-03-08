@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jan  9 22:35:52 2023
+"""This module contains the function kICS. 
 
+Created on Mon Jan  9 22:35:52 2023
 @author: Martin
 """
 import numpy as np
@@ -9,6 +9,16 @@ import scipy
 import math
 
 def kICS(J, varargin):
+    """This function calculates the autocorrelation in accordance with the kICS-method.
+
+    Inputs:
+    r_k:            2 or 3 dimensional float numpy array. Image series of which the autocorrelation is going to be calculated.
+    varargin:       String containing additional options.
+
+
+    Outputs:
+    phi_k:          2 or 3 dimensional complex numpy array. Contains the autocorrelation.
+    """
     
     #  time lag to normalize by
     norm_lag = 0
@@ -31,7 +41,8 @@ def kICS(J, varargin):
     #  method, but is not used here to maintain convention and to enable user to
     #  perform FFT on result
     force_even = 0
-    
+
+    # Setting options corresponding to arguments
     for ii in range(0,len(varargin),2):
         if varargin[ii] in ('normByLag','normalizeByLag','normalizeByNthLag','tauLagNorm'):
             if isinstance((varargin[ii+1]),int) and varargin[ii+1] in (0,1):
@@ -94,7 +105,7 @@ def kICS(J, varargin):
     else:
         J_k = np.fft.fft2(J_fluct,axes=(0,1))
 
-
+    # Using the Wiener-Khinchin theorem to get the autocorrelation.
     if use_WKT:
         if math.floor(math.log2(T)) == math.log2(T):
             T_pad = 2*T
@@ -104,6 +115,7 @@ def kICS(J, varargin):
         F_J_k = np.fft.fft(J_k, T_pad, 2)
         r_k = np.fft.ifft((F_J_k)*np.conjugate(F_J_k),axis=2)
         r_k = r_k[:,:,:T]
+    # Get autocorrelation
     else:
         r_k = np.zeros((size_x, size_y, T))
         for tau in range(T):
@@ -112,6 +124,7 @@ def kICS(J, varargin):
     for tau in range(T):
         r_k[:,:,tau] = 1/(T-tau)*np.fft.fftshift(r_k[:,:,tau])
 
+    # Norm of autocorrelation
     if use_norm:
         phi_k = r_k/r_k[:,:,norm_lag]
     else:
