@@ -22,6 +22,9 @@ from kics_timeIntkICsFit import timeIntkICSFit
 #%%
 
 # input variables
+# Filepath of image series that is going to be analysed
+filename = './SimulationBleach/frac_diff_1_2_0000001bleach.tif'
+
 # logical if time window will be included in analysis and size of the time window in frames.
 use_time_win = 0
 time_win = 200
@@ -41,34 +44,6 @@ plotTauLags = np.arange(5)
 kSqMin = np.spacing(1)
 kSqMax = 1.8
 
-# min/max bounds on |k|^2
-ksq_min_noise = 10
-ksq_max_noise = 15
-
-# number of fits to compare
-n_fits = 5
-
-# lower/upper bounds on fit parameters, [D,rho_on,K,p_D]
-bounds = [(np.spacing(1),np.inf), # np.inf
-          (np.spacing(1),1),
-          (np.spacing(1),np.inf), # np.inf
-          (np.spacing(1),1),
-          ]
-
-# import of images through the filename
-filename = './SimulationBleach/frac_diff_1_2_0000001bleach.tif'
-
-im = cv2.imreadmulti(filename,[],cv2.IMREAD_UNCHANGED)
-J = np.asarray(im[1],dtype = np.float64)
-J = np.moveaxis(J,0,-1)
-print(np.shape(J))
-T = np.size(J,2)
-
-# Number of points the fit is plotted on
-nPtsFitPlot = int(1e3)
-
-
-
 #  ROIs to consider (one per row; form [x0,y0,width,height])
 if np.size(J,1) >= 128 and np.size(J,0) >= 128:
     roi = np.array([[0,0,63,63],
@@ -84,6 +59,31 @@ else:
             ])
 
 # roi = np.array([[0,0,127,127]])
+
+# min/max bounds on |k|^2
+ksq_min_noise = 10
+ksq_max_noise = 15
+
+# number of fits to compare
+n_fits = 5
+
+# Number of points the fit is plotted on
+nPtsFitPlot = int(1e3)
+
+# lower/upper bounds on fit parameters, [D,rho_on,K,p_D]
+bounds = [(np.spacing(1),np.inf), # np.inf
+          (np.spacing(1),1),
+          (np.spacing(1),np.inf), # np.inf
+          (np.spacing(1),1),
+          ]
+
+# import of images through the filename
+im = cv2.imreadmulti(filename,[],cv2.IMREAD_UNCHANGED)
+J = np.asarray(im[1],dtype = np.float64)
+J = np.moveaxis(J,0,-1)
+print(np.shape(J))
+T = np.size(J,2)
+
 
 #%%
 # main code
