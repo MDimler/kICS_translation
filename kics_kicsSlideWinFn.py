@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jan 16 11:28:13 2023
+"""This module contains the function kICSSlideWinFn. 
 
+Created on Mon Jan 16 11:28:13 2023
 @author: Martin
 """
 
@@ -9,7 +9,14 @@ import numpy as np
 import math
 
 def kICSSlideWinFn(s, kSqGrid, tauGrid):
-    
+    """This function does some parts of the calculation of the normalised correlation function.
+
+    Inputs:
+    s:            Dictionary containing parameters needed for fitting. I.e. diffusion coefficient parameter, etc.
+    kSqGrid, tauGrid: Complex numpy arrays corresponding to the |k|^2-vector and the time lags.
+    Outputs:
+    tupel         Tupel corresponding to different parts of the normalised correlation function.
+    """
     A = s['D'] * kSqGrid
 
     # static autocorrelation term
@@ -91,8 +98,6 @@ def kICSSlideWinFn(s, kSqGrid, tauGrid):
     static_term_norm = 2*s['K']**(-2)*((-1)+s['r'])*s['r']*s['Ts']**(-2)*(1+np.exp((-1)*s['K']*((-1)+s['Ts'])) \
         *(np.exp((-1)*s['K'])*((-1)+s['Ts'])+(-1)*s['Ts'])+s['Ts']*((-1)+s['K']+s['Ts']+(-1)*s['K']* \
         s['Ts'])+np.exp((-1)*s['K'])*(s['Ts']+(-1)*s['Ts']**2))
-
-    #print(s['K'], s['Ts'], tauGrid[-1,-1], static_term_t[-1,-1], tauGrid[-1,-1], static_term[-1,-1], diff_term[-1,-1])
     
     return (static_term,diff_term,static_term_norm,diff_term_norm)
 
