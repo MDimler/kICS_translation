@@ -1,16 +1,31 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Jan 13 11:36:40 2023
+"""This module contains the function getKSqVector. 
 
+Created on Fri Jan 13 11:36:40 2023
 @author: Martin
 """
 import numpy as np
 
 def getKSqVector(r_k, varargin="", nargout = False):
-    
+    """This function creates a |k|^2 vector and cuts it to bounds.
+
+    Inputs:
+    r_k:            2 or 3 dimensional float numpy array. Image series, where |k|^2 vector is corresponding to.
+    varargin:       String containing bounds to the |k|^2 vector and additional options.
+    nargout:        Boolean value. Determining the type of the output.
+
+    Outputs:
+    if nargout==False:
+    ksq_sub:        1 dimensional float numpy array. Cut |k|^2 vector.
+    iksq_sub        1 dimensional int numpy array. Indices corresponding to cut |k|^2 vector.
+    if nargout==True:
+    lattice_inds:   2 dimensional int numpy array. Indices corresponding to values with equal 
+                    distance to center in respect to the bounds.
+    """
     ksq_min = 'min'
     ksq_max = 'max'
     use_zero = 0
+    # Setting options corresponding to arguments
     for i in range(len(varargin)):
         try:
             if varargin[i].lower() == 'kSqMin'.lower():
@@ -80,15 +95,18 @@ def getKSqVector(r_k, varargin="", nargout = False):
 
     ksq_sub = ksq[iksq_min:iksq_max]
     iksq_sub = np.arange(iksq_min, iksq_max)
+    # Cut k_lattice_sqrd to bounds
     if nargout:
         # get corresponding lattice indices in the range [ksq_min,ksq_max]
         # lattice_inds = np.where(k_lattice_sqrd <= ksq_max and k_lattice_sqrd >= ksq_min)
         lattice_inds = np.where((k_lattice_sqrd <= ksq_max) & (k_lattice_sqrd >= ksq_min))
+    # Delete 0 out of vectors if flags indicates it.
     if use_zero == 0 and ksq_sub[0] == 0:
         ksq_sub = np.delete(ksq_sub, 0)
         iksq_sub = np.delete(iksq_sub, 0)
         if nargout:
             lattice_inds = np.delete(lattice_inds, 0)
+    # Output depending on nargout.
     if nargout:
         return lattice_inds
     return (ksq_sub, iksq_sub)
