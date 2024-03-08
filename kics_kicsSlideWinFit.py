@@ -9,7 +9,7 @@ import numpy as np
 from kics_kicsSlideWinFn import kICSSlideWinFn
 
 def kICSSlideWinFit(params, kSq, tauVector, T_s, varargin):
-    """This function contains the normalised correlation function that is used for fitting the autocorrelation.
+    """This function contains the normalised correlation function with consideration to the time window that is used for fitting the autocorrelation.
 
     Inputs:
     params:         tupel containing 4 floats. Parameter used for fitting.
