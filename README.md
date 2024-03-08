@@ -23,9 +23,6 @@ n_fits: Number of fits that will be compared to combat the random start of the f
 nPtsFitPlot: Resolution of the fitting curve.
 Bounds: This are the lower/upper bounds of the fit parameters ([D,rho_on,K,p_D]) this can be changed to influence the fitting.
 
-
-![grafik](https://github.com/MDimler/kICS_translation/assets/113688502/c0327eed-d006-4987-9713-cbbfb7393404)
-
 # License
 [MIT](LICENSE) © Martin Dimler
 
