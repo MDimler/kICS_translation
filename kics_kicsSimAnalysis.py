@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Jan 12 11:44:41 2023
+"""This module contains code for analysing a image series of diffusing particles with the extended kICS method.
+Included are two fitting functions: one which takes the time window into account and one who doesn't. The autocorrelation,
+The corresponding fits and the parameters are outputted.
 
+Created on Thu Jan 12 11:44:41 2023
 @author: Martin
 """
-
-# this code is for plotting and fitting a TICS blink/bleach autocorrelation
-# including plots and fits for blink/bleach regimes
-
+# Import of packages
 import numpy as np
 from scipy import optimize
 import matplotlib.pyplot as plt
-import pickle # speichern der Variablen
 import cv2
-import time
 
+# Import of functions from other modules.
 from kics_kics import kICS
 from kics_kicsSubNoise import kICSSubNoise
 from kics_circular import circular
@@ -22,14 +20,17 @@ from kics_getKSqVector import getKSqVector
 from kics_kicsSlideWinFit import kICSSlideWinFit
 from kics_timeIntkICsFit import timeIntkICSFit
 #%%
-# input variables
 
-# time window
+# input variables
+# logical if time window will be included in analysis and size of the time window in frames.
 use_time_win = 0
-time_win = 100 #200
+time_win = 200
 
 # logical for including windowing in fit model
 win_fit = 0
+
+# logical if graphic should be saved
+save = 0
 
 # tau range to fit
 tauVector = np.arange(10)
@@ -38,37 +39,23 @@ plotTauLags = np.arange(5)
 
 # min/max bounds on |k|^2
 kSqMin = np.spacing(1)
-kSqMax = 2 #1.8
+kSqMax = 1.8
 
 # min/max bounds on |k|^2
 ksq_min_noise = 10
-ksq_max_noise = 15 # 15
+ksq_max_noise = 15
 
 # number of fits to compare
 n_fits = 5
 
 # lower/upper bounds on fit parameters, [D,rho_on,K,p_D]
-# lb = np.spacing(1)*np.ones((1,4))
-# ub = [np.inf, 1, np.inf, 1]
 bounds = [(np.spacing(1),np.inf), # np.inf
           (np.spacing(1),1),
           (np.spacing(1),np.inf), # np.inf
           (np.spacing(1),1),
           ]
 
-# import of images
-test1 = True
-if test1:
-    filename = 'D_5_kon_0.1_koff_0.9_frac_diff_0.7_kp_0.0001.tif'
-else:
-    filename = 'D_0.01_kon_1_koff_0.7_frac_diff_0.65_kp_0.0001.tif.tif'
-
-# filename = './Data_Giovanni/POPC1Chol1/2_50mW_4ms.tif'
-# filename = './Data_Giovanni/POPC2Chol1/4ms_40mW_1.tif'
-# filename ='difftestseries.tif'
-# filename = 'frac_diff_0_9_2.tif'
-# filename = 'frac_diff_1_2_1part.tif'
-# filename = './SimulationParticles/frac_diff_1_2_1part.tif'
+# import of images through the filename
 filename = './SimulationBleach/frac_diff_1_2_0000001bleach.tif'
 
 im = cv2.imreadmulti(filename,[],cv2.IMREAD_UNCHANGED)
@@ -76,11 +63,13 @@ J = np.asarray(im[1],dtype = np.float64)
 J = np.moveaxis(J,0,-1)
 print(np.shape(J))
 T = np.size(J,2)
+
+# Number of points the fit is plotted on
 nPtsFitPlot = int(1e3)
 
 
 
-#  rois to consider (one per row; form [x0,y0,width,height])
+#  ROIs to consider (one per row; form [x0,y0,width,height])
 if np.size(J,1) >= 128 and np.size(J,0) >= 128:
     roi = np.array([[0,0,63,63],
             [64,64,63,63],
@@ -94,20 +83,18 @@ else:
             [32,0,31,31]
             ])
 
-# roi = np.array([[0,0,63,63]])
 # roi = np.array([[0,0,127,127]])
+
+#%%
 # main code
 
-# Ordner???
-
 for i in range(np.size(roi,0)):
-    # roi image series
+    # ROI of the image series
     J_roi = np.copy(J[roi[i, 1]:roi[i, 1]+roi[0, 3]+1,
                     roi[i, 0]:roi[i, 0]+roi[i, 2]+1, :])
 
     # compute kICS autocorr
-    # tic
-    
+
     #kICS autocorrelation function (ACF)
     if use_time_win:
         time_win_varargin = ('timeWin', time_win)
@@ -122,7 +109,7 @@ for i in range(np.size(roi,0)):
     r_k_0_circ,_ = circular(r_k_0_sub[:,:])
     r_k_circ,_ = circular(r_k)
     # get and cut |k|^2 vector
-    # kSqVector, kSqInd = getKSqVector(J_roi) # Needed to plot kICS autocorrelation at tau=0
+    # Needed to plot kICS autocorrelation at tau=0
     kSqVectorSubset, kSqSubsetInd = getKSqVector(
         J_roi, ('kSqMin', kSqMin, 'kSqMax', kSqMax))
 
@@ -186,29 +173,19 @@ for i in range(np.size(roi,0)):
     ax.legend()
     ax.set_xlim([kSqVectorSubset[0], kSqVectorSubset[-1]])
     # ax.set_ylim()
-    
-    # # test
-    # opt_params = np.array([0.01, 0.588235294117647, 1.7, 0.649982166210914])
-    # print("Test parameters are used")
+
     
     for tauInd in range(len(plotTauLags)):
         ax.plot(ksq2plot, fit_fun(opt_params,ksq2plot,plotTauLags[tauInd]))
-    # tightfig(gfc)?
     
     # saving
-    filename = ('ROI_X_'+str(roi[i,0])
-                +'-'+str(roi[i,0]+roi[i,2]-1)
-                +'_Y_'+str(roi[i,1])
-                +'_'+str(roi[i,1]+roi[i,3]-1)
-                )
+    if save:
+          filename = ('ROI_X_'+str(roi[i,0])
+                          +'-'+str(roi[i,0]+roi[i,2]-1)
+                          +'_Y_'+str(roi[i,1])
+                          +'_'+str(roi[i,1]+roi[i,3]-1)
+                          )
     
     print("Optimal parameter are: ")
     for parm in opt_params:
         print(parm)
-    # d = {'r_k_norm': r_k_norm, 'kSqMin': kSqMin, 'kSqMax': kSqMax,
-    #      'opt_params': opt_params, 'win_fit': win_fit, 'time_win': time_win,
-    #      'tauVector': tauVector, 'err_min': err_min}
-
-    # with open(filename, 'wb') as f:
-    #     pickle.dump(d, f)
-
