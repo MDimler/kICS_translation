@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Jan  4 10:55:45 2023
+"""This module contains the function circular.
 
+Created on Wed Jan  4 10:55:45 2023
 @author: Martin
 """
 import numpy as np
