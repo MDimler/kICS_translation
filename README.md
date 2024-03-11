@@ -18,7 +18,7 @@ tauVector: Range of time lags that will be included in the fitting.
 plotTauLags: Range of time lags shown in the diagramm
 kSqMin, kSqMax: Bounds to |k|^2. Recommended is between close to 0 and 1.8.
 Roi: Region of interest to analyse. This should be a vector with one ROI per row in the form ([x0,y0,width,height]), with x0 and y0 being the start coordinates and width and height the width and height of the ROI in pixels.
-ksq_min_noise, ksq_max_noise: Bound on |k|^2 with respect to the noise.
+ksq_min_noise, ksq_max_noise: Bounds on |k|^2 where the noise for the normalisation of the autocorrelation will be taken.
 n_fits: Number of fits that will be compared to combat the random start of the fitting.
 nPtsFitPlot: Resolution of the fitting curve.
 Bounds: This are the lower/upper bounds of the fit parameters ([D,rho_on,K,p_D]) this can be changed to influence the fitting.
