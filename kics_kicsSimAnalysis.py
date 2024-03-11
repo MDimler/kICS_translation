@@ -23,7 +23,7 @@ from kics_timeIntkICsFit import timeIntkICSFit
 
 # input variables
 # Filepath of image series that is going to be analysed
-filename = './SimulationBleach/frac_diff_1_2_0000001bleach.tif'
+filename = './particles128diffusion1_2.tif'
 
 # logical if time window will be included in analysis and size of the time window in frames.
 use_time_win = 0
@@ -60,7 +60,7 @@ else:
 
 # roi = np.array([[0,0,127,127]])
 
-# min/max bounds on |k|^2
+# min/max bounds from where the noise that will be used for the normalisation of the autocorrelation is taken
 ksq_min_noise = 10
 ksq_max_noise = 15
 
